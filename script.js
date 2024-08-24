@@ -4,9 +4,15 @@ const answerButtons = document.getElementById("answer-buttons");
 const nextButton = document.getElementById("next-btn");
 const restartButton = document.getElementById("restart-btn");
 const resultDiv = document.getElementById("result");
+const quizCreationContainer = document.getElementById("quiz-creation-container");
+const quizCreationForm = document.getElementById("quiz-creation-form");
+const questionsContainer = document.getElementById("questions-container");
+const addQuestionButton = document.getElementById("add-question-btn");
 
 let shuffledQuestions, currentQuestionIndex, score;
+let createdQuizzes = [];
 
+// Sample questions for default quiz
 const questions = [
   {
     question: "What is 2 + 2?",
@@ -119,4 +125,65 @@ function endQuiz() {
   restartButton.classList.remove("hide");
   resultDiv.classList.remove("hide");
   resultDiv.innerText = `Your final score: ${score} / ${shuffledQuestions.length}`;
+}
+
+// Quiz creation functionality
+addQuestionButton.addEventListener("click", addQuestionInput);
+
+function addQuestionInput() {
+  const questionDiv = document.createElement("div");
+  questionDiv.classList.add("question-input");
+
+  questionDiv.innerHTML = `
+    <label>Question:</label>
+    <input type="text" class="question-text" required />
+    <label>Answers:</label>
+    <input type="text" class="answer-text" required placeholder="Answer 1" />
+    <input type="text" class="answer-text" required placeholder="Answer 2" />
+    <input type="text" class="answer-text" required placeholder="Answer 3" />
+    <input type="text" class="answer-text" required placeholder="Answer 4" />
+    <label>Correct Answer:</label>
+    <input type="number" class="correct-answer" required min="1" max="4" />
+    <hr>
+  `;
+
+  questionsContainer.appendChild(questionDiv);
+}
+
+quizCreationForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  saveQuiz();
+});
+
+function saveQuiz() {
+  const quizTitle = document.getElementById("quiz-title").value;
+  const questionInputs = document.querySelectorAll(".question-input");
+
+  const quiz = {
+    title: quizTitle,
+    questions: [],
+  };
+
+  questionInputs.forEach((questionDiv) => {
+    const questionText = questionDiv.querySelector(".question-text").value;
+    const answers = Array.from(questionDiv.querySelectorAll(".answer-text")).map(
+      (input) => input.value
+    );
+    const correctAnswerIndex = questionDiv.querySelector(".correct-answer").value - 1;
+
+    quiz.questions.push({
+      question: questionText,
+      answers: answers.map((answer, index) => ({
+        text: answer,
+        correct: index === correctAnswerIndex,
+      })),
+    });
+  });
+
+  createdQuizzes.push(quiz);
+  alert("Quiz saved successfully!");
+
+  // Reset the form after saving
+  quizCreationForm.reset();
+  questionsContainer.innerHTML = "";
 }
